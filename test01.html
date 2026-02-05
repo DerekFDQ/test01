@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>权限不足</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f2f2f2;
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .error {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 200px;
+      height: 200px;
+      background-color: red;
+      color: white;
+      font-size: 24px;
+      font-weight: bold;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>权限不足</h1>
+    <div class="error">权限不足</div>
+    <p>您没有访问该页面的权限，请联系管理员。</p>
+    <p>页面将在5秒后自动跳转。</p>
+  </div>
+  <script>
+    setTimeout(function() {
+      window.location.href = window.history.go(-1);
+    }, 5000);
+  </script>
+</body>
+</html>

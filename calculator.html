@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>计算器</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap");
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #2c3e50, #1a1a2e);
+        font-family: "Poppins", sans-serif;
+        overflow: hidden;
+        position: relative;
+      }
+
+      body::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(
+          circle at center,
+          rgba(255, 255, 255, 0.1) 0%,
+          transparent 70%
+        );
+        z-index: 0;
+      }
+
+      .calculator-container {
+        position: relative;
+        z-index: 1;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        width: 320px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        animation: fadeIn 0.8s ease-out forwards;
+      }
+
+      .display {
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        text-align: right;
+        font-size: 28px;
+        color: #ffffff;
+        height: 80px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        overflow: hidden;
+      }
+
+      .current-input {
+        font-size: 32px;
+        font-weight: 500;
+        min-height: 40px;
+      }
+
+      .previous-input {
+        font-size: 18px;
+        color: rgba(255, 255, 255, 0.7);
+        min-height: 20px;
+      }
+
+      .buttons {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+      }
+
+      .btn {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        color: #ffffff;
+        font-size: 20px;
+        font-weight: 500;
+        padding: 15px 0;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .btn::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateX(-100%);
+        transition: all 0.3s ease;
+      }
+
+      .btn:hover::after {
+        transform: translateX(0);
+      }
+
+      .btn:hover {
+        transform: translateY(-2px);
+      }
+
+      .btn:active {
+        transform: translateY(0);
+      }
+
+      .operator {
+        background: rgba(79, 140, 255, 0.2);
+      }
+
+      .equals {
+        background: linear-gradient(to right, #4f8cff, #3a7bf0);
+        grid-column: span 2;
+      }
+
+      .clear {
+        background: rgba(231, 76, 60, 0.2);
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="calculator-container">
+      <div class="display">
+        <div class="previous-input"></div>
+        <div class="current-input">0</div>
+      </div>
+      <div class="buttons">
+        <button class="btn clear" data-action="clear">C</button>
+        <button class="btn" data-action="backspace">←</button>
+        <button class="btn operator" data-action="divide">÷</button>
+        <button class="btn operator" data-action="multiply">×</button>
+
+        <button class="btn" data-number="7">7</button>
+        <button class="btn" data-number="8">8</button>
+        <button class="btn" data-number="9">9</button>
+        <button class="btn operator" data-action="subtract">-</button>
+
+        <button class="btn" data-number="4">4</button>
+        <button class="btn" data-number="5">5</button>
+        <button class="btn" data-number="6">6</button>
+        <button class="btn operator" data-action="add">+</button>
+
+        <button class="btn" data-number="1">1</button>
+        <button class="btn" data-number="2">2</button>
+        <button class="btn" data-number="3">3</button>
+
+        <button class="btn" data-number="0">0</button>
+        <button class="btn" data-number=".">.</button>
+        <button class="btn equals" data-action="equals">=</button>
+      </div>
+    </div>
+
+    <script>
+      let currentInput = "0";
+      let previousInput = "";
+      let operation = null;
+      let shouldResetScreen = false;
+
+      const currentDisplay = document.querySelector(".current-input");
+      const previousDisplay = document.querySelector(".previous-input");
+
+      /*************  ✨ Windsurf Command ⭐  *************/
+      /**
+       * 清除当前输入
+       * @description 将当前输入重置为 0，将previousInput和operation重置为空字符串，并更新显示
+       */
+      /*******  b3ea8d92-bc3a-405a-8092-794fa764c8b6  *******/
+      function clear() {
+        currentInput = "0";
+        previousInput = "";
+        operation = null;
+        updateDisplay();
+      }
+
+      /*************  ✨ Windsurf Command ⭐  *************/
+      /**
+       * 在当前输入的末尾添加一个数字
+       * 如果当前输入为空字符串 "0"，或者 shouldResetScreen 为 true,
+       * 则将当前输入设置为 number，并将 shouldResetScreen 设置为 false
+       * 否则将 number 添加到当前输入的末尾
+       * @param {string} number - 需要添加的数字
+       */
+      /*******  ae39132d-f892-4b69-8979-424381612460  *******/
+      function appendNumber(number) {
+        if (currentInput === "0" || shouldResetScreen) {
+          currentInput = number;
+          shouldResetScreen = false;
+        } else {
+          currentInput += number;
+        }
+        updateDisplay();
+      }
+
+      /*************  ✨ Windsurf Command ⭐  *************/
+      /**
+       * 选择操作
+       * @param {string} op - 操作符号，可以是 '+', '-', '*', '/' 等
+       * @description 如果当前有未完成的操作，则先执行compute()，
+       * 然后将 operation 设置为 op，previousInput 设置为当前输入，并将
+       * shouldResetScreen 设置为 true，最后更新显示
+       */
+      /*******  17a02ef0-2dfe-4313-bd00-2f1e315d96a9  *******/
+      function chooseOperation(op) {
+        if (operation !== null) {
+          compute();
+        }
+        operation = op;
+        previousInput = currentInput;
+        shouldResetScreen = true;
+        updateDisplay();
+      }
+
+      function compute() {
+        let computation;
+        const prev = parseFloat(previousInput);
+        const current = parseFloat(currentInput);
+
+        if (isNaN(prev) || isNaN(current)) return;
+
+        switch (operation) {
+          case "add":
+            computation = prev + current;
+            break;
+          case "subtract":
+            computation = prev - current;
+            break;
+          case "multiply":
+            computation = prev * current;
+            break;
+          case "divide":
+            computation = prev / current;
+            break;
+          default:
+            return;
+        }
+
+        currentInput = computation.toString();
+        operation = null;
+        previousInput = "";
+        updateDisplay();
+      }
+
+      /*************  ✨ Windsurf Command 🌟  *************/
+      /*************  ✨ Windsurf Command ⭐  *************/
+      /**
+       * 更新显示
+       * @description 根据currentInput和operation更新display的内容
+       * 如果operation不为空，则previousDisplay的内容为previousInput + operation的对应符号
+       * 否则previousDisplay的内容为previousInput
+       * 这个函数的主要作用是根据当前输入和操作类型更新显示屏幕的内容
+       * 首先更新当前显示屏幕的内容为当前输入的值
+       * 然后，如果当前操作不为空，则更新上一个显示屏幕的内容
+       * 上一个显示屏幕的内容是上一个输入的值 + 当前的操作符号
+       * 否则上一个显示屏幕的内容是上一个输入的值
+       */
+      /*******  206361d4-9983-449b-9f00-939b9abed716  *******/
+      function updateDisplay() {
+        // 更新当前显示屏幕的内容
+        currentDisplay.textContent = currentInput;
+        // 如果当前操作不为空，则更新上一个显示屏幕的内容
+        if (operation) {
+          // 获取当前操作的对应符号
+          const operatorSymbol =
+            operation === "add"
+              ? "+"
+              : operation === "subtract"
+                ? "-"
+                : operation === "multiply"
+                  ? "×"
+                  : "÷";
+          // 更新上一个显示屏幕的内容
+          previousDisplay.textContent = `${previousInput} ${operatorSymbol}`;
+        } else {
+          // 否则上一个显示屏幕的内容是上一个输入的值
+          previousDisplay.textContent = previousInput;
+        }
+      }
+      /*******  0ce565a0-4519-4e75-8b44-9931ea8215c0  *******/
+
+      /*************  ✨ Windsurf Command ⭐  *************/
+      /**
+       * 删除当前输入的最后一个字符
+       * 如果当前输入为空字符串，则重置当前输入为"0"
+       */
+      /*******  302cea49-74de-4a01-ba01-d8ce5db29c53  *******/
+      function backspace() {
+        currentInput = currentInput.toString().slice(0, -1);
+        if (currentInput === "") {
+          currentInput = "0";
+        }
+        updateDisplay();
+      }
+
+      // 添加事件监听器
+      document.querySelectorAll("[data-number]").forEach((button) => {
+        button.addEventListener("click", () => {
+          appendNumber(button.textContent);
+        });
+      });
+
+      document.querySelectorAll("[data-action]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const action = button.getAttribute("data-action");
+          if (action === "clear") {
+            clear();
+          } else if (action === "backspace") {
+            backspace();
+          } else if (action === "equals") {
+            compute();
+          } else {
+            chooseOperation(action);
+          }
+        });
+      });
+
+      // 初始化
+      clear();
+    </script>
+  </body>
+</html>
